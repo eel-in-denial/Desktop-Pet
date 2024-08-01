@@ -8,16 +8,27 @@ class Spine():
         self.points_list = []
         self.radi_list = radi
         self.sizes_list = sizes
-        self.drawings_list = []
-        self.drawing_points = []
+        self.rigged_list = []
+        self.body_list = []
         for i in range(circle_no):
-            self.points_list.append([50 + i*self.radi_list[i], 50])
-            self.drawing_points.append([self.points_list[i][0]-self.radi_list[i], self.points_list[i][1]-self.radi_list[i], self.points_list[i][0]+self.radi_list[i], self.points_list[i][1]+self.radi_list[i]])
-            circle = canvas.create_oval(self.drawing_points[i], outline='blue', width=2)
-            self.drawings_list.append(circle)
+            self.points_list.append([50 + i*50, 50])
+            # drawing_points = [self.points_list[i][0]-self.radi_list[i], self.points_list[i][1]-self.radi_list[i], self.points_list[i][0]+self.radi_list[i], self.points_list[i][1]+self.radi_list[i]]
+            # circle = canvas.create_oval(drawing_points, outline='blue', width=2)
+            # self.rigged_list.append(circle)
+            drawing_points = [self.points_list[i][0]-self.sizes_list[i], self.points_list[i][1]-self.sizes_list[i], self.points_list[i][0]+self.sizes_list[i], self.points_list[i][1]+self.sizes_list[i]]
+            circle = canvas.create_oval(drawing_points, outline='blue', width=2)
+            self.body_list.append(circle)
     def update(self, mouse_x, mouse_y):
-        self.points[0][0], self.points[0][1] = mouse_x, mouse_y
-        
+        for i in range(len(self.points_list)):
+            if i == 0:
+                self.points_list[0][0], self.points_list[0][1] = mouse_x, mouse_y
+            else:
+                sqrt = math.sqrt((self.points_list[i][0] - self.points_list[i-1][0])**2 + (self.points_list[i][1] - self.points_list[i-1][1])**2)
+                length = (sqrt-self.radi_list[i])/sqrt
+                self.points_list[i][0] += length*(self.points_list[i-1][0]-self.points_list[i][0])
+                self.points_list[i][1] += length*(self.points_list[i-1][1]-self.points_list[i][1])
+            # canvas.moveto(self.rigged_list[i], int(self.points_list[i][0] - self.radi_list[i]), int(self.points_list[i][1] - self.radi_list[i]))
+            canvas.moveto(self.body_list[i], int(self.points_list[i][0] - self.sizes_list[i]), int(self.points_list[i][1] - self.sizes_list[i]))
 
 
 class Pet():
@@ -29,24 +40,14 @@ class Pet():
         self.radius = 50
         self.direction_x = 1
         self.direction_y = 1
-        self.head = canvas.create_oval(self.x-self.radius, self.y-self.radius, self.x+self.radius, self.y+self.radius, outline='blue', width=2)
-        self.neck = canvas.create_oval(self.x2-self.radius, self.y2-self.radius, self.x2+self.radius, self.y2+self.radius, outline='blue', width=2)
         self.dv_x = 0
         self.dv_y = 0
         self.length = 0
-        self.spine = Spine(5, [50, 50, 50, 50, 50], [50, 50, 50, 50, 50])
+        radi = [50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50]
+        bodies = [50, 38, 38, 38, 37, 36, 35, 34, 33, 32, 31, 30, 28, 26, 24, 22, 20, 18, 16, 14]
+        self.spine = Spine(20, radi, bodies)
     def update(self):
-        self.x += self.direction_x
-        self.y += self.direction_y
-        if self.x >= width:
-            self.direction_x = -10
-        mouse_x, mouse_y = window.winfo_pointerx() - self.radius, window.winfo_pointery() - self.radius
-        self.x, self.y = mouse_x, mouse_y
-        canvas.moveto(self.head, self.x, self.y)
-        self.length = (math.sqrt((self.x2 - self.x)**2 + (self.y2 - self.y)**2)-50)/math.sqrt((self.x2 - self.x)**2 + (self.y2 - self.y)**2)
-        self.x2 += self.length*(self.x-self.x2)
-        self.y2 += self.length*(self.y-self.y2)
-        canvas.moveto(self.neck, self.x2, self.y2)
+        self.spine.update(window.winfo_pointerx(), window.winfo_pointery())
 
 
 def programloop(): # main loop
