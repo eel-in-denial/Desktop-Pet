@@ -2,6 +2,24 @@ import time
 import tkinter as tk
 import random
 import math
+
+class Spine():
+    def __init__(self, circle_no, radi, sizes):
+        self.points_list = []
+        self.radi_list = radi
+        self.sizes_list = sizes
+        self.drawings_list = []
+        self.drawing_points = []
+        for i in range(circle_no):
+            self.points_list.append([50 + i*self.radi_list[i], 50])
+            self.drawing_points.append([self.points_list[i][0]-self.radi_list[i], self.points_list[i][1]-self.radi_list[i], self.points_list[i][0]+self.radi_list[i], self.points_list[i][1]+self.radi_list[i]])
+            circle = canvas.create_oval(self.drawing_points[i], outline='blue', width=2)
+            self.drawings_list.append(circle)
+    def update(self, mouse_x, mouse_y):
+        self.points[0][0], self.points[0][1] = mouse_x, mouse_y
+        
+
+
 class Pet():
     def __init__(self):
         self.x = width/2
@@ -15,18 +33,20 @@ class Pet():
         self.neck = canvas.create_oval(self.x2-self.radius, self.y2-self.radius, self.x2+self.radius, self.y2+self.radius, outline='blue', width=2)
         self.dv_x = 0
         self.dv_y = 0
+        self.length = 0
+        self.spine = Spine(5, [50, 50, 50, 50, 50], [50, 50, 50, 50, 50])
     def update(self):
-        # self.x += self.direction_x
-        # self.y += self.direction_y
-        # if self.x >= width:
-        #     self.direction_x = -10
-        mouse_x, mouse_y = window.winfo_pointerx(), window.winfo_pointery()
-        self.direction_x, self.direction_y = mouse_x - self.x, mouse_y - self.y
-        canvas.move(self.head, self.direction_x, self.direction_y)
+        self.x += self.direction_x
+        self.y += self.direction_y
+        if self.x >= width:
+            self.direction_x = -10
+        mouse_x, mouse_y = window.winfo_pointerx() - self.radius, window.winfo_pointery() - self.radius
         self.x, self.y = mouse_x, mouse_y
-        self.dv_x, self.dv_y= (50/math.sqrt(self.x**2 + self.y**2))*(self.x2 - self.x), (50/math.sqrt(self.x**2 + self.y**2))*(self.y2 - self.y)
-        canvas.move(self.neck, self.x+self.dv_x-self.x2, self.y+self.dv_y-self.y2)
-
+        canvas.moveto(self.head, self.x, self.y)
+        self.length = (math.sqrt((self.x2 - self.x)**2 + (self.y2 - self.y)**2)-50)/math.sqrt((self.x2 - self.x)**2 + (self.y2 - self.y)**2)
+        self.x2 += self.length*(self.x-self.x2)
+        self.y2 += self.length*(self.y-self.y2)
+        canvas.moveto(self.neck, self.x2, self.y2)
 
 
 def programloop(): # main loop
