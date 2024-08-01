@@ -4,42 +4,29 @@ import random
 
 class Pet():
     def __init__(self):
-        self.window = tk.Tk()
-        self.x = 0
-        self.y = 0
+        self.x = width/2
+        self.y = height/2
+        self.radius = 50
         self.directiontimer = 60
-        self.direction_x = 0
-        self.direction_y = 0
-
-        img = tk.PhotoImage(file="MCcloak.png")
-
-        self.window.config(highlightbackground='black')
-
-        self.window.overrideredirect(True) # window becomes frameless
-
-        self.window.attributes('-topmost', True) # window is always at top
-
-        self.window.wm_attributes('-transparentcolor', 'black') # black becomes transparent (background)
-
-        self.label = tk.Label(self.window, bd=0, bg='black') # image container
-
-        self.window.geometry(f"128x128+{self.x}+{self.y}") # set size and location
-
-        self.label.configure(image=img) # add image
-
-        self.label.pack() # doing thing thongs
-
-        self.window.after(0, self.update) #run update every frame from very first frame (after 0)
-        self.window.mainloop()
+        self.direction_x = 1
+        self.direction_y = 1
+        canvas.create_oval(self.x-self.radius, self.y-self.radius, self.x+self.radius, self.y+self.radius, fill='red', outline='blue')
     def update(self):
+        self.x += self.direction_x
+        # self.y += self.direction_y
+        if self.x >= width:
+            self.direction_x = -1
 
-        if self.directiontimer > 0:
-            self.directiontimer -= 1
-            if self.directiontimer == 0:
-                self.direction_x = random.rand()
-        self.x += 1
-        self.y += 1
-        self.window.geometry(f"128x128+{self.x}+{self.y}") # new pos
-        self.window.after(10, self.update)
+window = tk.Tk()
+window.attributes('-fullscreen', True)
+window.attributes('-topmost', True)
+height = window.winfo_screenheight()
+width = window.winfo_screenwidth()
+print(height, width)
+canvas = tk.Canvas(window, bg='black', highlightthickness=0)
+canvas.pack(fill=tk.BOTH, expand=True)
+window.wm_attributes('-transparentcolor', 'black')
+pet = Pet()
+window.after_idle(pet.update())
+window.mainloop()
 
-Pet()
