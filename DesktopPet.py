@@ -3,7 +3,7 @@ import tkinter as tk
 import random
 import math
 
-pi = 3.14159
+pi = math.pi
 
 class Spine():
     def __init__(self, circle_no, radi, sizes):
@@ -18,6 +18,7 @@ class Spine():
         self.direction = []
         self.body = ""
         for i in range(circle_no):
+            # body and rigging
             self.points_list.append([50 + i*50, 50])
             # drawing_points = [self.points_list[i][0]-self.radi_list[i], self.points_list[i][1]-self.radi_list[i], self.points_list[i][0]+self.radi_list[i], self.points_list[i][1]+self.radi_list[i]]
             # circle = canvas.create_oval(drawing_points, outline='blue', width=2)
@@ -25,18 +26,21 @@ class Spine():
             drawing_points = [self.points_list[i][0]-self.sizes_list[i], self.points_list[i][1]-self.sizes_list[i], self.points_list[i][0]+self.sizes_list[i], self.points_list[i][1]+self.sizes_list[i]]
             circle = canvas.create_oval(drawing_points, outline='blue', width=2)
             self.body_canvas.append(circle)
+            # side circles
             self.direction.append(pi)
             self.body_points_left.append([self.points_list[i][0] + math.cos(self.direction[i]-pi/2)*self.sizes_list[i], self.points_list[i][1] + math.sin(self.direction[i]-pi/2)*self.sizes_list[i]])
             self.body_points_right.append([self.points_list[i][0] + math.cos(self.direction[i]+pi/2)*self.sizes_list[i], self.points_list[i][1] + math.sin(self.direction[i]+pi/2)*self.sizes_list[i]])
-            # drawing_points = [self.body_points_left[i][0]-5, self.body_points_left[i][1]-5, self.body_points_left[i][0]+5, self.body_points_left[i][1]+5]
-            # circle = canvas.create_oval(drawing_points, outline='red', width=2)
-            # self.side_canvas.append(circle)
-            # drawing_points = [self.body_points_right[i][0]-5, self.body_points_right[i][1]-5, self.body_points_right[i][0]+5, self.body_points_right[i][1]+5]
-            # circle = canvas.create_oval(drawing_points, outline='orange', width=2)
-            # self.side_canvas.append(circle)
-            self.body_points_right.reverse()
-            self.body = canvas.create_polygon(self.body_points_left + self.body_points_right, outline="white", width=2, smooth=1, fill="yellow")
-            self.body_points_right.reverse()
+            #side circles drawn
+            drawing_points = [self.body_points_left[i][0]-5, self.body_points_left[i][1]-5, self.body_points_left[i][0]+5, self.body_points_left[i][1]+5]
+            circle = canvas.create_oval(drawing_points, outline='red', width=2)
+            self.side_canvas.append(circle)
+            drawing_points = [self.body_points_right[i][0]-5, self.body_points_right[i][1]-5, self.body_points_right[i][0]+5, self.body_points_right[i][1]+5]
+            circle = canvas.create_oval(drawing_points, outline='orange', width=2)
+            self.side_canvas.append(circle)
+        # polygon
+        self.body_points_right.reverse()
+        self.body = canvas.create_polygon(self.body_points_left + self.body_points_right, outline="white", width=2, smooth=1, fill="yellow")
+        self.body_points_right.reverse()
     def update(self, mouse_x, mouse_y):
         for i in range(len(self.points_list)):
             sqrt = math.sqrt((self.points_list[i][0] - self.points_list[i-1][0])**2 + (self.points_list[i][1] - self.points_list[i-1][1])**2)
@@ -46,7 +50,7 @@ class Spine():
                 length = self.sizes_list[i]/sqrt
             else:
                 length = 1-(self.radi_list[i]/sqrt)
-                direction_x, direction_y = self.points_list[i-1][0]-self.points_list[i][0], self.points_list[i-1][1]-self.points_list[i][1]
+                direction_x, direction_y = self.points_list[i-1][0] - self.points_list[i][0], self.points_list[i-1][1] - self.points_list[i][1]
                 self.points_list[i][0] += length*(direction_x)
                 self.points_list[i][1] += length*(direction_y)
             # calculates position of points
@@ -54,10 +58,10 @@ class Spine():
             self.body_points_left[i] = [self.points_list[i][0] + math.cos(self.direction[i]-pi/2)*self.sizes_list[i], self.points_list[i][1] + math.sin(self.direction[i]-pi/2)*self.sizes_list[i]]
             self.body_points_right[i] = [self.points_list[i][0] + math.cos(self.direction[i]+pi/2)*self.sizes_list[i], self.points_list[i][1] + math.sin(self.direction[i]+pi/2)*self.sizes_list[i]]
             # moves the side circles
-            # drawing_points = [self.body_points_left[i][0]-5, self.body_points_left[i][1]-5, self.body_points_left[i][0]+5, self.body_points_left[i][1]+5]
-            # canvas.moveto(self.side_canvas[i*2], drawing_points)
-            # drawing_points = [self.body_points_right[i][0]-5, self.body_points_right[i][1]-5, self.body_points_right[i][0]+5, self.body_points_right[i][1]+5]
-            # canvas.moveto(self.side_canvas[i*2+1], drawing_points)
+            drawing_points = [self.body_points_left[i][0]-5, self.body_points_left[i][1]-5]
+            canvas.moveto(self.side_canvas[i*2], *drawing_points)
+            drawing_points = [self.body_points_right[i][0]-5, self.body_points_right[i][1]-5]
+            canvas.moveto(self.side_canvas[i*2+1], *drawing_points)
 
             # moves polygon body shape
             self.body_points_right.reverse()
@@ -91,7 +95,7 @@ class Pet():
 
 def programloop(): # main loop
     pet.update()
-    window.after(10, programloop)
+    window.after(100, programloop)
 
 def check_key(event): # check what key was pressed
     if event.keysym == "p":
@@ -110,6 +114,7 @@ canvas = tk.Canvas(window, bg='black', highlightthickness=0)
 canvas.pack(fill=tk.BOTH, expand=True)
 window.wm_attributes('-transparentcolor', 'black') # make black transparent
 pet = Pet()
+print("heello")
 
 # event bindings
 window.bind("<KeyPress>", check_key)
