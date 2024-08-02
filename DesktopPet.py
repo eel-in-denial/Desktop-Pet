@@ -16,6 +16,7 @@ class Spine():
         self.body_points_right = []
         self.side_canvas = []
         self.direction = []
+        self.body = ""
         for i in range(circle_no):
             self.points_list.append([50 + i*50, 50])
             # drawing_points = [self.points_list[i][0]-self.radi_list[i], self.points_list[i][1]-self.radi_list[i], self.points_list[i][0]+self.radi_list[i], self.points_list[i][1]+self.radi_list[i]]
@@ -25,21 +26,22 @@ class Spine():
             circle = canvas.create_oval(drawing_points, outline='blue', width=2)
             self.body_canvas.append(circle)
             self.direction.append(pi)
-            self.body_points_left.append(self.points_list[i][0] + math.cos(self.direction[i]-pi/2)*self.sizes_list[i])
-            self.body_points_left.append(self.points_list[i][1] + math.sin(self.direction[i]-pi/2)*self.sizes_list[i])
-            self.body_points_right.append(self.points_list[i][0] + math.cos(self.direction[i]+pi/2)*self.sizes_list[i])
-            self.body_points_right.append(self.points_list[i][1] + math.sin(self.direction[i]+pi/2)*self.sizes_list[i])
-            drawing_points = [self.body_points_left[i*2]-5, self.body_points_left[i*2+1]-5, self.body_points_left[i*2]+5, self.body_points_left[i*2+1]+5]
-            circle = canvas.create_oval(drawing_points, outline='red', width=2)
-            self.side_canvas.append(circle)
-            drawing_points = [self.body_points_right[i*2]-5, self.body_points_right[i*2+1]-5, self.body_points_right[i*2]+5, self.body_points_right[i*2+1]+5]
-            circle = canvas.create_oval(drawing_points, outline='red', width=2)
-            self.side_canvas.append(circle)
+            self.body_points_left.append([self.points_list[i][0] + math.cos(self.direction[i]-pi/2)*self.sizes_list[i], self.points_list[i][1] + math.sin(self.direction[i]-pi/2)*self.sizes_list[i]])
+            self.body_points_right.append([self.points_list[i][0] + math.cos(self.direction[i]+pi/2)*self.sizes_list[i], self.points_list[i][1] + math.sin(self.direction[i]+pi/2)*self.sizes_list[i]])
+            # drawing_points = [self.body_points_left[i][0]-5, self.body_points_left[i][1]-5, self.body_points_left[i][0]+5, self.body_points_left[i][1]+5]
+            # circle = canvas.create_oval(drawing_points, outline='red', width=2)
+            # self.side_canvas.append(circle)
+            # drawing_points = [self.body_points_right[i][0]-5, self.body_points_right[i][1]-5, self.body_points_right[i][0]+5, self.body_points_right[i][1]+5]
+            # circle = canvas.create_oval(drawing_points, outline='orange', width=2)
+            # self.side_canvas.append(circle)
+            self.body_points_right.reverse()
+            self.body = canvas.create_polygon(self.body_points_left + self.body_points_right, outline="white", width=2, smooth=1, fill="yellow")
+            self.body_points_right.reverse()
     def update(self, mouse_x, mouse_y):
         for i in range(len(self.points_list)):
             sqrt = math.sqrt((self.points_list[i][0] - self.points_list[i-1][0])**2 + (self.points_list[i][1] - self.points_list[i-1][1])**2)
             if i == 0:
-                direction_x, direction_y = self.points_list[0][0] - mouse_x, self.points_list[0][1] - mouse_y
+                direction_x, direction_y = mouse_x - self.points_list[0][0], mouse_y - self.points_list[0][1]
                 self.points_list[0][0], self.points_list[0][1] = mouse_x, mouse_y
                 length = self.sizes_list[i]/sqrt
             else:
@@ -47,16 +49,24 @@ class Spine():
                 direction_x, direction_y = self.points_list[i-1][0]-self.points_list[i][0], self.points_list[i-1][1]-self.points_list[i][1]
                 self.points_list[i][0] += length*(direction_x)
                 self.points_list[i][1] += length*(direction_y)
-
+            # calculates position of points
             self.direction[i] = math.atan2(direction_y, direction_x)
-            self.body_points_left[i*2] = self.points_list[i][0] + math.cos(self.direction[i]-pi/2)*self.sizes_list[i]
-            self.body_points_left[i*2+1] = self.points_list[i][1] + math.sin(self.direction[i]-pi/2)*self.sizes_list[i]
-            self.body_points_right[i*2] = self.points_list[i][0] + math.cos(self.direction[i]+pi/2)*self.sizes_list[i]
-            self.body_points_right[i*2+1] = self.points_list[i][1] + math.sin(self.direction[i]+pi/2)*self.sizes_list[i]
-            canvas.moveto(self.side_canvas[i*2], self.body_points_left[i*2]-5, self.body_points_left[i*2+1]-5)
-            canvas.moveto(self.side_canvas[i*2+1], self.body_points_right[i*2]-5, self.body_points_right[i*2+1]-5)
-            
+            self.body_points_left[i] = [self.points_list[i][0] + math.cos(self.direction[i]-pi/2)*self.sizes_list[i], self.points_list[i][1] + math.sin(self.direction[i]-pi/2)*self.sizes_list[i]]
+            self.body_points_right[i] = [self.points_list[i][0] + math.cos(self.direction[i]+pi/2)*self.sizes_list[i], self.points_list[i][1] + math.sin(self.direction[i]+pi/2)*self.sizes_list[i]]
+            # moves the side circles
+            # drawing_points = [self.body_points_left[i][0]-5, self.body_points_left[i][1]-5, self.body_points_left[i][0]+5, self.body_points_left[i][1]+5]
+            # canvas.moveto(self.side_canvas[i*2], drawing_points)
+            # drawing_points = [self.body_points_right[i][0]-5, self.body_points_right[i][1]-5, self.body_points_right[i][0]+5, self.body_points_right[i][1]+5]
+            # canvas.moveto(self.side_canvas[i*2+1], drawing_points)
+
+            # moves polygon body shape
+            self.body_points_right.reverse()
+            canvas.coords(self.body, self.body_points_left + self.body_points_right)
+            self.body_points_right.reverse()
+
+            # moves rigging circles
             # canvas.moveto(self.rigged_canvas[i], int(self.points_list[i][0] - self.radi_list[i]), int(self.points_list[i][1] - self.radi_list[i]))
+            # moves body circles
             canvas.moveto(self.body_canvas[i], int(self.points_list[i][0] - self.sizes_list[i]), int(self.points_list[i][1] - self.sizes_list[i]))
 
  # detect perpendicular and then create polygon
