@@ -124,23 +124,30 @@ class Pet():
 class UI():
     def __init__(self):
         self.buttons = []
-        button = tk.Button(content, height=1, width=10, bg="red", command=self.pet_select, text="Pet Select", fg="white", font="Arial 18 bold")
+        button = tk.Button(canvas, height=1, width=10, bg="red", command=self.pet_select, text="Pet Select", fg="white", font="Arial 18 bold")
         button.place(x=750, y=750)
         self.buttons.append(button)
-        button = tk.Button(content, height=1, width=10, bg="red", command=self.pet_edit, text="Pet Edit", fg="white", font="Arial 18 bold")
+        button = tk.Button(canvas, height=1, width=10, bg="red", command=self.pet_edit, text="Pet Edit", fg="white", font="Arial 18 bold")
         button.place(x=950, y=750)
         self.buttons.append(button)
-        button = tk.Button(content, height=1, width=10, bg="red", command=self.organisation, text="Organisation", fg="white", font="Arial 18 bold")
+        button = tk.Button(canvas, height=1, width=10, bg="red", command=self.organisation, text="Organisation", fg="white", font="Arial 18 bold")
         button.place(x=1150, y=750)
         self.buttons.append(button)
-        button = tk.Button(content, height=1, width=10, bg="red", command = window.destroy, text="Quit", fg="white", font="Arial 18 bold")
+        button = tk.Button(canvas, height=1, width=10, bg="red", command = window.destroy, text="Quit", fg="white", font="Arial 18 bold")
         button.place(x=1350, y=750)
         self.buttons.append(button)
     def pet_select(self):
-        frame = ttk.Frame(content, padding=5, borderwidth=2, width=200, height=500)
-        frame.grid(column=0, row=0, columnspan=3, rowspan=2)
-        title = ttk.Label(frame, text="Pet Selection")
-        title.grid(column=0, row=0, columnspan=2)
+        petslist = ["snake", "lizard", "fish"]
+        petslistvar = tk.StringVar(value=petslist)
+        frame = ttk.Frame(canvas, padding=5, borderwidth=2, style="pet_select.TFrame", name="hello")
+        frame.place(x=width-425, y=25, width=400, height=700)
+        title = ttk.Label(frame, text="Pet Selection", font="Arial 18 bold")
+        title.grid(column=0, row=0)
+        listbox = tk.Listbox(frame, height=20, width=60, listvariable=petslistvar)
+        listbox.grid(column=0, row=1)
+        scrollbar = ttk.Scrollbar(frame, orient="vertical", command=listbox.yview)
+        scrollbar.grid(column=1, row=1)
+        listbox.configure(yscrollcommand=scrollbar.set)
     def pet_edit(self):
         print("sdf")
     def organisation(self):
@@ -155,20 +162,18 @@ def check_key(event): # check what key was pressed
         window.destroy() # close program
 
 # creating window / fullscreen / top overlay
-s = ttk.Style()
 window = tk.Tk()
-content = ttk.Frame(window, bg="gerey15")
-content.grid(column=0, row=0)
 window.attributes('-fullscreen', True)
 window.attributes('-topmost', True)
-window.attributes("-bg", "grey15")
+s = ttk.Style()
+s.configure("pet_select.TFrame", background="white")
 # set height and width variables
 height = window.winfo_screenheight()
 width = window.winfo_screenwidth()
 
 #set up black canvas
 canvas = tk.Canvas(window, bg='grey15', highlightthickness=0)
-canvas.grid(column=0, row=0)
+canvas.pack(fill="both", expand=True)
 window.wm_attributes('-transparentcolor', 'grey15') # make black transparent
 ui = UI()
 # pet = Pet()
