@@ -26,9 +26,9 @@ class Path():
             p2 = 3*t*(1-t)**2
             p3 = 3*(t**2)*(1-t)
             p4 = t**3
-            point = [self.points[0].x*p1 + self.points[0].post_x*p2 + self.points[1].pre_x*p3 + self.points[1].x*p4, self.points[0].y*p1 + self.points[0].pre_y*p2 + self.points[1].post_y*p3 + self.points[1].y*p4]
+            point = [self.points[0].x*p1 + self.points[0].post_x*p2 + self.points[1].pre_x*p3 + self.points[1].x*p4, self.points[0].y*p1 + self.points[0].post_y*p2 + self.points[1].pre_y*p3 + self.points[1].y*p4]
             self.bezier_points.append(point)
-            point = [self.points[0].x*p1 + self.points[0].post_x*p2 + self.points[1].pre_x*p3 + self.points[1].x*p4, self.points[0].y*p1 + self.points[0].pre_y*p2 + self.points[1].post_y*p3 + self.points[1].y*p4]
+            point = [self.points[1].x*p1 + self.points[1].post_x*p2 + self.points[2].pre_x*p3 + self.points[2].x*p4, self.points[1].y*p1 + self.points[1].post_y*p2 + self.points[2].pre_y*p3 + self.points[2].y*p4]
             self.bezier_points.append(point)
         for p in self.bezier_points:
             draw.circle(screen, WHITE, [p[0], p[1]], 2)
@@ -42,26 +42,17 @@ class Path():
             p2 = 3*t*(1-t)**2
             p3 = 3*(t**2)*(1-t)
             p4 = t**3
-            point = [self.points[0].x*p1 + self.points[0].pre_x*p2 + self.points[1].post_x*p3 + self.points[1].x*p4, self.points[0].y*p1 + self.points[0].pre_y*p2 + self.points[1].post_y*p3 + self.points[1].y*p4]
+            point = [self.points[0].x*p1 + self.points[0].post_x*p2 + self.points[1].pre_x*p3 + self.points[1].x*p4, self.points[0].y*p1 + self.points[0].post_y*p2 + self.points[1].pre_y*p3 + self.points[1].y*p4]
             self.bezier_points.append(point)
-            point = [self.points[1].x*p1 + self.points[1].post_x*p2 + self.points[2].pre_x*p3 + self.points[2].x*p4, self.points[1].y*p1 + self.points[1].pre_y*p2 + self.points[2].post_y*p3 + self.points[2].y*p4]
+            point = [self.points[1].x*p1 + self.points[1].post_x*p2 + self.points[2].pre_x*p3 + self.points[2].x*p4, self.points[1].y*p1 + self.points[1].post_y*p2 + self.points[2].pre_y*p3 + self.points[2].y*p4]
             self.bezier_points.append(point)
-   # def randomize(self):
-    #     for i in range(3):
-    #         self.points[i][0], self.points[i][1] = random.randrange(0, width), random.randrange(0, height)
-    #         canvas.moveto(self.points_canvas[i], self.points[i][0]-5, self.points[i][1]-5)
-    #         self.tweenpoints[i] = [self.points[i][0]+self.direction[i][0]*self.distance[i], self.points[i][1]+self.direction[i][1]*self.distance[i]]
-    #         canvas.coords(self.direction_canvas[i], self.points[i][0], self.points[i][1], self.tweenpoints[i][0], self.tweenpoints[i][1])
-
-        # for i in range(101):
-        #     t = i/100
-        #     p1 = (1-t)**3
-        #     p2 = 3*t*(1-t)**2
-        #     p3 = 3*(t**2)*(1-t)
-        #     p4 = t**3
-        #     point = [self.points[0][0]*p1 + self.tweenpoints[0][0]*p2 + self.tweenpoints[1][0]*p3 + self.points[1][0]*p4, self.points[0][1]*p1 + self.tweenpoints[0][1]*p2 + self.tweenpoints[1][1]*p3 + self.points[1][1]*p4]
-        #     drawing_points = [point[0]-2, point[1]-2]
-        #     canvas.moveto(self.bezier_canvas[i], *drawing_points)
+    def randomize(self):
+        for i in self.points:
+            i.x, i.y = random.randrange(0, SCREEN_WIDTH), random.randrange(0, SCREEN_HEIGHT)
+        for i in range(3):
+            i.pre_x, i.pre_y = i.x + math.cos(i.pre_angle)*i.pre_length, i.y + math.sin(i.pre_angle)*i.pre_length
+            i.post_x, i.post_y = i.x + math.cos(i.post_angle)*i.post_length, i.y + math.sin(i.post_angle)*i.pre_length
+        self.update()
 
     def draw(self, screen):
         for p in self.points:
@@ -106,14 +97,21 @@ class Node:
             self.pre_x, self.pre_y = m_x, m_y
             self.pre_length = math.sqrt((self.pre_x-self.x)**2+(self.pre_y-self.y)**2)
             self.pre_angle = math.atan2((self.pre_y-self.y), (self.pre_x-self.x))
+            self.post_angle = self.pre_angle - pi
+            self.post_x, self.post_y = self.x + math.cos(self.post_angle)*self.post_length, self.y + math.sin(self.post_angle)*self.pre_length
         elif self.post_clickstate == True:
             self.post_x, self.post_y = m_x, m_y
             self.post_length = math.sqrt((self.post_x-self.x)**2+(self.post_y-self.y)**2)
             self.post_angle = math.atan2((self.post_y-self.y), (self.post_x-self.x))
+            self.pre_angle = self.post_angle - pi
+            self.pre_x, self.pre_y = self.x + math.cos(self.pre_angle)*self.pre_length, self.y + math.sin(self.pre_angle)*self.pre_length
+
     def draw(self, screen):
         draw.circle(screen, self.colour, [self.x, self.y], self.radius, 4)
         draw.circle(screen, self.pre_colour, [self.pre_x, self.pre_y], self.radius, 4)
         draw.circle(screen, self.post_colour, [self.post_x, self.post_y], self.radius, 4)
+        draw.line(screen, self.pre_colour, (self.x, self.y), (self.pre_x, self.pre_y))
+        draw.polygon(screen, self.pre_colour, [(self.x + 10*(self.x-self.pre_x), self.y + 10*(self.y-self.pre_y)), (self.x - 10*(self.x-self.pre_x), self.y - 10*(self.y-self.pre_y)), (0, SCREEN_WIDTH), (SCREEN_WIDTH, SCREEN_HEIGHT)])
 
 ##### Colours ##### 
 BLACK = (0,   0,   0) 
@@ -168,6 +166,10 @@ while not done:
             drag = False
             for p in path.points:
                 p.unclick()
+        
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_r:
+                path.randomize()
     if drag == True:
         mouse_x, mouse_y = pygame.mouse.get_pos()
         path.update()
