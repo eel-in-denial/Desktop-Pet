@@ -1,62 +1,146 @@
-import tkinter as tk
+import pygame
 import random
 import math
+pygame.init() 
 
 pi = math.pi
 
 class Path():
     def __init__(self):
-        self.points = [[random.randrange(0, width), random.randrange(0, height)], [random.randrange(0, width), random.randrange(0, height)], [random.randrange(0, width), random.randrange(0, height)]]
+        self.points = []
+        self.mainpoints = []
+        self.subpoints = []
         self.direction = [[50, 50], [50, 50], [50, 50]]
-        self.tweenpoints = [[self.points[0][0]+self.direction[0][0]*2, self.points[0][1]+self.direction[0][1]*2], [self.points[1][0]+self.direction[1][0]*2, self.points[1][1]+self.direction[1][1]*2], [self.points[2][0]+self.direction[2][0]*2, self.points[2][1]+self.direction[2][1]*2]]
         self.possible_direction = [[-pi, pi], [-pi, pi], [-pi, pi]]
-        self.points_canvas = []
-        self.bezier_canvas = []
-        drawing_points = [self.points[0][0]-10, self.points[0][1]-10, self.points[0][0]+10, self.points[0][1]+10]
-        circle = canvas.create_oval(drawing_points, outline='red', width=2, fill="red")
-        self.points_canvas.append(circle)
-        drawing_points = [self.points[1][0]-10, self.points[1][1]-10, self.points[1][0]+10, self.points[1][1]+10]
-        circle = canvas.create_oval(drawing_points, outline='green', width=2, fill="green")
-        self.points_canvas.append(circle)
-        drawing_points = [self.points[2][0]-10, self.points[2][1]-10, self.points[2][0]+10, self.points[2][1]+10]
-        circle = canvas.create_oval(drawing_points, outline='blue', width=2, fill="blue")
-        self.points_canvas.append(circle)
+        self.distance = [2, 2, 2]
+        self.colour = [colour_1, colour_2, colour_3, colour_4, colour_5, colour_6]
+        self.bezier_points = []
+        for i in range(3):
+            # drawing_points = [self.points[i][0], self.points[i][1], self.tweenpoints[i][0], self.tweenpoints[i][1]]
+            # line = canvas.create_line(drawing_points, fill=self.colour[i], width=2)
+            # self.direction_canvas.append(line)
+            node = Node(random.randrange(0, SCREEN_WIDTH), random.randrange(0, SCREEN_HEIGHT), self.colour[i])
+            self.points.append(node)
+            self.mainpoints.append(node)
+            node = Node(self.mainpoints[i].x + self.direction[i][0]*self.distance[i], self.mainpoints[i].y + self.direction[i][1]*self.distance[i], self.colour[i+3])
+            self.points.append(node)
+            self.subpoints.append(node)
+
         for i in range(101):
             t = i/100
             p1 = (1-t)**3
             p2 = 3*t*(1-t)**2
             p3 = 3*(t**2)*(1-t)
             p4 = t**3
-            point = [self.points[0][0]*p1 + self.tweenpoints[0][0]*p2 + self.tweenpoints[1][0]*p3 + self.points[1][0]*p4, self.points[0][1]*p1 + self.tweenpoints[0][1]*p2 + self.tweenpoints[1][1]*p3 + self.points[1][1]*p4]
-            drawing_points = [point[0]-2, point[1]-2, point[0]+2, point[1]+2,]
-            circle = canvas.create_oval(drawing_points, outline='white', width=2, fill="white")
-            self.bezier_canvas.append(circle)
+            point = [self.mainpoints[0].x*p1 + self.subpoints[0].x*p2 + self.subpoints[1].x*p3 + self.mainpoints[1].x*p4, self.mainpoints[0].y*p1 + self.subpoints[0].y*p2 + self.subpoints[1].y*p3 + self.mainpoints[1].y*p4]
+            self.bezier_points.append(point)
+        for p in self.bezier_points:
+            draw.circle(screen, WHITE, [p[0], p[1]], 2)
+    def draw(self, screen):
+        for p in self.points:
+            p.draw(screen)
+        for p in self.bezier_points:
+            draw.circle(screen, WHITE, [p[0], p[1]], 2)
 
+    # def randomize(self):
+    #     for i in range(3):
+    #         self.points[i][0], self.points[i][1] = random.randrange(0, width), random.randrange(0, height)
+    #         canvas.moveto(self.points_canvas[i], self.points[i][0]-5, self.points[i][1]-5)
+    #         self.tweenpoints[i] = [self.points[i][0]+self.direction[i][0]*self.distance[i], self.points[i][1]+self.direction[i][1]*self.distance[i]]
+    #         canvas.coords(self.direction_canvas[i], self.points[i][0], self.points[i][1], self.tweenpoints[i][0], self.tweenpoints[i][1])
 
-    def randomize(self):
-        for i in range(3):
-            canvas.moveto(self.points_canvas[i], random.randrange(0, width), random.randrange(0, height))
-            print(random.randrange(0, width))
-        
+        # for i in range(101):
+        #     t = i/100
+        #     p1 = (1-t)**3
+        #     p2 = 3*t*(1-t)**2
+        #     p3 = 3*(t**2)*(1-t)
+        #     p4 = t**3
+        #     point = [self.points[0][0]*p1 + self.tweenpoints[0][0]*p2 + self.tweenpoints[1][0]*p3 + self.points[1][0]*p4, self.points[0][1]*p1 + self.tweenpoints[0][1]*p2 + self.tweenpoints[1][1]*p3 + self.points[1][1]*p4]
+        #     drawing_points = [point[0]-2, point[1]-2]
+        #     canvas.moveto(self.bezier_canvas[i], *drawing_points)
 
-def check_key(event): # check what key was pressed
-    if event.keysym == "p":
-        window.destroy() # close program
+class Node:
+    def __init__(self, pos_x, pos_y, colour):
+        self.x = pos_x
+        self.y = pos_y
+        self.radius = 10
+        self.clickstate = False
+        self.colour = colour
+    def click(self, m_x, m_y):
+        if math.sqrt((m_x-self.x)**2+(m_y-self.y)**2) < self.radius:
+            self.clickstate = True
+    def unclick(self):
+        self.clickstate = False
+    def drag(self, m_x, m_y):
+        global curve
+        self.x = m_x
+        self.y = m_y
+        curve = []
+    def draw(self, screen):
+        draw.circle(screen, self.colour, [self.x, self.y], self.radius, 4)
 
-# creating window / fullscreen / top overlay
-window = tk.Tk()
-window.attributes('-fullscreen', True)
-window.attributes('-topmost', True)
-# set height and width variables
-height = window.winfo_screenheight()
-width = window.winfo_screenwidth()
+##### Colours ##### 
+BLACK = (0,   0,   0) 
+WHITE = (255, 255, 255)
+LGREY = (180, 180, 180)
+DGREY = (100, 100, 100)
+GRIDCOLOUR = (125, 180, 220)
+GRIDCOLOUR2 = (85, 100, 160)
+colour_1 = (255,   0,   0) 
+colour_2  = (0,   255, 0) 
+colour_3 = (0,  0,   255) 
+colour_4 = (255, 120, 120)
+colour_5 = (120, 255, 120)
+colour_6 = (120, 120, 255)
 
+##### Screen Initialisation ##### 
+SCREEN_WIDTH = 1200 
+SCREEN_HEIGHT = 700 
+size = (SCREEN_WIDTH, SCREEN_HEIGHT) 
+screen = pygame.display.set_mode(size) 
+pygame.display.set_caption("Newton Fractals") 
 
-#set up black canvas
-canvas = tk.Canvas(window, bg='black', highlightthickness=0)
-canvas.pack(fill=tk.BOTH, expand=True)
-window.bind("<KeyPress>", check_key)
+##### Track if need to quit ##### 
+done = False               
+clock = pygame.time.Clock() 
+##### Global Variables // Create Classes ##### 
+draw = pygame.draw
+font = pygame.font.Font('freesansbold.ttf', 32)
+drag = False
+t=0
+pointno=0
 path = Path()
-button = tk.Button(window, height=2, width=20, bg="yellow", command=path.randomize, text="randomize")
-button.place(x=1300, y=800)
-window.mainloop() # checks events
+
+while not done: 
+    screen.fill(BLACK) 
+    ##### Events Loop ##### 
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            done = True
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            drag = True
+            for p in path.points[0]:
+                p.click(mouse_x, mouse_y)
+                   
+        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            drag = False
+            for p in path.points[0]:
+                p.unclick()
+    if drag == True:
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        for p in path.points[0]:
+            if p.clickstate == True:
+                p.drag(mouse_x, mouse_y)
+    if t == 100:
+        direction = -1
+    elif t == 0:
+        direction = 1
+    t+=direction
+    ##### Update Screen ##### 
+    path.draw(screen)
+    
+    pygame.display.flip() 
+    clock.tick(60) 
+ 
+pygame.quit() 
