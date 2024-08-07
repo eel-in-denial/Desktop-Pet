@@ -63,6 +63,7 @@ class Spine():
         drawing_points = [self.eyes[1][0]-10, self.eyes[1][1]-10, self.eyes[1][0]+10, self.eyes[1][1]+10]
         eye = canvas.create_oval(drawing_points, outline='black', width=2, fill="black")
         self.eyes_canvas.append(eye)
+        window.after(10, programloop)
     def update(self, mouse_x, mouse_y):
         for i in range(len(self.points_list)):
             sqrt = math.sqrt((self.points_list[i][0] - self.points_list[i-1][0])**2 + (self.points_list[i][1] - self.points_list[i-1][1])**2)
@@ -136,25 +137,38 @@ class UI():
         button = tk.Button(canvas, height=1, width=10, bg="red", command = window.destroy, text="Quit", fg="white", font="Arial 18 bold")
         button.place(x=1350, y=750)
         self.buttons.append(button)
+        self.pet_frame = ""
+        self.edit_frame = ""
+        self.organisation_frame = ""
     def pet_select(self):
-        petslist = ["snake", "lizard", "fish"]
-        petslistvar = tk.StringVar(value=petslist)
-        frame = ttk.Frame(canvas, padding=5, borderwidth=2, style="pet_select.TFrame", name="hello")
-        frame.place(x=width-425, y=25, width=400, height=700)
-        title = ttk.Label(frame, text="Pet Selection", font="Arial 18 bold")
+        self.pet_frame = ttk.Frame(canvas, padding=5, borderwidth=2, style="pet_select.TFrame")
+        self.pet_frame.place(x=width-425, y=25, width=400, height=700)
+        title = ttk.Label(self.pet_frame, text="Pet Selection", font="Arial 24 bold")
         title.grid(column=0, row=0)
-        listbox = tk.Listbox(frame, height=20, width=60, listvariable=petslistvar)
-        listbox.grid(column=0, row=1)
-        scrollbar = ttk.Scrollbar(frame, orient="vertical", command=listbox.yview)
-        scrollbar.grid(column=1, row=1)
-        listbox.configure(yscrollcommand=scrollbar.set)
+        snake_row = ttk.Frame(self.pet_frame, padding=5, borderwidth=2, style="pet_option.TFrame")
+        snake_row.grid(column=0, row=1)
+        snake_image = tk.Canvas(snake_row, width=100, height=100)
+        snake_image.grid(column=0, row=0)
+        snake_image.create_rectangle(4,4,100,100, outline= 'black', width=4)
+        snake_label = ttk.Label(snake_row, text="Snake", padding=50, font="Arial 18 bold", background="grey80")
+        snake_label.grid(column=1, row=0)
+        snake_button = tk.Button(snake_row, text="Snake", font="Arial 18 bold", command= lambda: self.choose_pet())
+        snake_button.grid(column=2, row=0)
     def pet_edit(self):
         print("sdf")
     def organisation(self):
         print("sdf")
+    def choose_pet(self):
+        global pet
+        pet = Pet()
+        self.pet_frame.place_forget()
+        for b in self.buttons:
+            b.place_forget()
+
 
 def programloop(): # main loop
-    pet.update()
+    if pet != 0:
+        pet.update()
     window.after(10, programloop)
 
 def check_key(event): # check what key was pressed
@@ -167,6 +181,7 @@ window.attributes('-fullscreen', True)
 window.attributes('-topmost', True)
 s = ttk.Style()
 s.configure("pet_select.TFrame", background="white")
+s.configure("pet_option.TFrame", background="grey80")
 # set height and width variables
 height = window.winfo_screenheight()
 width = window.winfo_screenwidth()
@@ -175,8 +190,10 @@ width = window.winfo_screenwidth()
 canvas = tk.Canvas(window, bg='grey15', highlightthickness=0)
 canvas.pack(fill="both", expand=True)
 window.wm_attributes('-transparentcolor', 'grey15') # make black transparent
+
+#global
+pet = 0
 ui = UI()
-# pet = Pet()
 # event bindings
 window.bind("<KeyPress>", check_key)
 
