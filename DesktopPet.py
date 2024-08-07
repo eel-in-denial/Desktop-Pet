@@ -210,6 +210,11 @@ class UI:
 class Path:
     def __init__(self):
         self.points = []
+        self.point_counter = 0
+        self.colour = ["red", "green", "blue"]
+        for i in range(3):
+            point = Node(100 + i*100, 100 + i*100, self.colour[i])
+            self.points.append(point)
         # self.direction = [[50, 50], [50, 50], [50, 50]]
         # self.distance = [2, 2, 2]
         # self.colour = [colour_1, colour_2, colour_3, colour_4, colour_5, colour_6, colour_7, colour_8, colour_9]
@@ -233,8 +238,17 @@ class Path:
         #     self.bezier_points.append(point)
         # for p in self.bezier_points:
         #     draw.circle(screen, WHITE, [p[0], p[1]], 2)
-    def create_node(self):
-        print("werewrw")
+    def create_node(self, m_x, m_y):
+        point = Node(m_x, m_y, self.colour[self.point_counter])
+        self.points.append(point)
+        del self.points[0]
+        self.point_counter += 1
+        if self.point_counter == 3:
+            self.point_counter = 0
+    def __del__(self):
+        for i in self.points:
+            del i
+        
     # def update(self):
     #     for p in self.points:
     #         p.drag(mouse_x, mouse_y)
@@ -262,30 +276,38 @@ class Path:
     #     for p in self.bezier_points:
     #         draw.circle(screen, WHITE, [p[0], p[1]], 2)
 
-# class Node:
-#     def __init__(self, pos_x, pos_y, colour, pre_colour, post_colour):
-#         self.x, self.y = pos_x, pos_y
-#         self.radius = 10
-#         self.clickstate = False
-#         self.pre_clickstate = False
-#         self.post_clickstate = False
-#         self.colour = colour
-#         self.pre_colour = pre_colour
-#         self.post_colour = post_colour
-#         self.pre_length = 50
-#         self.post_length = 50
-#         self.pre_angle = pi
-#         self.post_angle = 0
-#         self.pre_x, self.pre_y = self.x + math.cos(self.pre_angle)*self.pre_length, self.y + math.sin(self.pre_angle)*self.pre_length
-#         self.post_x, self.post_y = self.x + math.cos(self.post_angle)*self.post_length, self.y + math.sin(self.post_angle)*self.pre_length
+class Node:
+    def __init__(self, pos_x, pos_y, colour):
+        self.radius = 10
+        self.clickstate = [False, False, False]
+        self.canvas = []
+
+        self.length = [50, 0, 50]
+        self.angle = [pi, 0, 0]
+        if colour == "red":
+            self.colour = ["red4", "red", "tomato"]
+        if colour == "green":
+            self.colour = ["dark green", "lime green", "lawn green"]
+        if colour == "blue":
+            self.colour = ["navy", "blue", "deep sky blue"]
+        self.x, self.y = [pos_x + math.cos(self.angle[0])*self.length[0], pos_x, pos_x + math.cos(self.angle[2])*self.length[2]], [pos_y + math.sin(self.angle[0])*self.length[0], pos_y, pos_y + math.sin(self.angle[2])*self.length[2]]
+
+        for i in range(3):
+            drawing_points = [self.x[i]-self.radius, self.y[i]-self.radius, self.x[i]+self.radius, self.y[i]+self.radius]
+            self.canvas.append(canvas.create_oval(drawing_points, outline=self.colour[i], width=5))
         
-#     def click(self, m_x, m_y):
-#         if math.sqrt((m_x-self.x)**2+(m_y-self.y)**2) < self.radius:
-#             self.clickstate = True
-#         elif math.sqrt((m_x-self.pre_x)**2+(m_y-self.pre_y)**2) < self.radius:
-#             self.pre_clickstate = True
-#         elif math.sqrt((m_x-self.post_x)**2+(m_y-self.post_y)**2) < self.radius:
-#             self.post_clickstate = True
+        
+    def click(self, m_x, m_y):
+        if math.sqrt((m_x-self.x[1])**2+(m_y-self.y[1])**2) < self.radius:
+            self.clickstate[1] = True
+            return True
+        elif math.sqrt((m_x-self.x[0])**2+(m_y-self.y[0])**2) < self.radius:
+            self.clickstate[0] = True
+            return True
+        elif math.sqrt((m_x-self.x[2])**2+(m_y-self.y[2])**2) < self.radius:
+            self.clickstate[2] = True
+            return True
+
 #     def unclick(self):
 #         self.clickstate = False
 #         self.pre_clickstate = False
@@ -312,6 +334,9 @@ class Path:
     #     draw.circle(screen, self.colour, [self.x, self.y], self.radius, 4)
     #     draw.circle(screen, self.pre_colour, [self.pre_x, self.pre_y], self.radius, 4)
     #     draw.circle(screen, self.post_colour, [self.post_x, self.post_y], self.radius, 4)
+    def __del__(self):
+        for i in self.canvas:
+            canvas.delete(i)
 
 def programloop(): # main loop
     global pet
@@ -327,8 +352,16 @@ def check_key(event): # check what key was pressed
 
 def check_mouse(event): # check what key was pressed
     global path
-    if path != "" and event.:
-        path.create_node()
+    clicked_state = False
+    print(event.widget)
+    x, y = event.x, event.y
+    if path != "":
+        for p in path.points:
+            if p.click(x, y) == True:
+                clicked_state = True
+                break
+        if event.widget == canvas and clicked_state == False:
+            path.create_node(x, y)
 
 # creating window / fullscreen / top overlay
 window = tk.Tk()
