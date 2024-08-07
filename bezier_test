@@ -49,7 +49,6 @@ class Path():
     def randomize(self):
         for i in self.points:
             i.x, i.y = random.randrange(0, SCREEN_WIDTH), random.randrange(0, SCREEN_HEIGHT)
-        for i in range(3):
             i.pre_x, i.pre_y = i.x + math.cos(i.pre_angle)*i.pre_length, i.y + math.sin(i.pre_angle)*i.pre_length
             i.post_x, i.post_y = i.x + math.cos(i.post_angle)*i.post_length, i.y + math.sin(i.post_angle)*i.pre_length
         self.update()
@@ -111,7 +110,6 @@ class Node:
         draw.circle(screen, self.pre_colour, [self.pre_x, self.pre_y], self.radius, 4)
         draw.circle(screen, self.post_colour, [self.post_x, self.post_y], self.radius, 4)
         draw.line(screen, self.pre_colour, (self.x, self.y), (self.pre_x, self.pre_y))
-        draw.polygon(screen, self.pre_colour, [(self.x + 10*(self.x-self.pre_x), self.y + 10*(self.y-self.pre_y)), (self.x - 10*(self.x-self.pre_x), self.y - 10*(self.y-self.pre_y)), (0, SCREEN_WIDTH), (SCREEN_WIDTH, SCREEN_HEIGHT)])
 
 ##### Colours ##### 
 BLACK = (0,   0,   0) 
@@ -135,7 +133,7 @@ SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 700 
 size = (SCREEN_WIDTH, SCREEN_HEIGHT) 
 screen = pygame.display.set_mode(size) 
-pygame.display.set_caption("Newton Fractals") 
+pygame.display.set_caption("Bezier Test") 
 
 ##### Track if need to quit ##### 
 done = False               
