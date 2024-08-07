@@ -63,7 +63,6 @@ class Spine:
             if i == 0:
                 direction_x, direction_y = mouse_x - self.points_list[0][0], mouse_y - self.points_list[0][1]
                 self.direction[i] = math.atan2(direction_y, direction_x)
-                print(self.direction[i])
                 self.points_list[0][0], self.points_list[0][1] = mouse_x, mouse_y
                 self.head[0] = [self.points_list[i][0] + math.cos(self.direction[i]+pi/6)*60, self.points_list[i][1] + math.sin(self.direction[i]+pi/6)*60]
                 self.head[1] = [self.points_list[i][0] + math.cos(self.direction[i]-pi/6)*60, self.points_list[i][1] + math.sin(self.direction[i]-pi/6)*60]
@@ -132,15 +131,12 @@ class UI:
             del pet
         pet = 0
         for i in range(4):
-            button = tk.Button(canvas, height=1, width=10, bg="red", command= lambda: self.switch_page(self.buttons_customize[i]), text=self.buttons_customize[i], fg="white", font="Arial 18 bold")
-            print(button.cget)
+            button = tk.Button(canvas, height=1, width=10, bg="red", command= lambda x=self.buttons_customize[i]: self.switch_page(x), text=self.buttons_customize[i], fg="white", font="Arial 18 bold")
             button.place(x=750 + i*200, y=750)
             self.buttons.append(button)
-        # for i in self.buttons:
-        #     print(i.command)
-    def pet_select(self):
+    def pet_select(self, x_distance, event):
         self.pet_frame = ttk.Frame(canvas, padding=5, borderwidth=2, style="frame.TFrame")
-        self.pet_frame.place(x=screen_width-425, y=25, width=400, height=700)
+        self.pet_frame.place(x=x_distance-425, y=25, width=400, height=700)
         title = ttk.Label(self.pet_frame, text="Pet Selection", font="Arial 24 bold")
         title.grid(column=0, row=0)
         snake_row = ttk.Frame(self.pet_frame, padding=5, borderwidth=2, style="pet_option.TFrame")
@@ -148,94 +144,123 @@ class UI:
         snake_image = tk.Canvas(snake_row, width=100, height=100)
         snake_image.grid(column=0, row=0)
         snake_image.create_rectangle(4,4,100,100, outline= 'black', width=4)
-        snake_label = ttk.Label(snake_row, text="Snake", padding=50, font="Arial 18 bold", background="grey80")
+        snake_label = ttk.Label(snake_row, text="Snake", padding=40, font="Arial 18 bold", background="grey80")
         snake_label.grid(column=1, row=0)
-        snake_button = tk.Button(snake_row, text="Snake", font="Arial 18 bold", command= lambda: self.choose_pet())
+        snake_button = tk.Button(snake_row, text="Choose", font="Arial 18 bold", command=event)
         snake_button.grid(column=2, row=0)
     def pet_edit(self):
+        self.pet_select(450, self.edit_choose)
         self.edit_frame = ttk.Frame(canvas, padding=5, borderwidth=2, style="frame.TFrame")
-        self.edit_frame.place(x=screen_width-1225, y=25, width=1200, height=700)
-        title = ttk.Label(self.edit_frame, text="Pet Selection", font="Arial 24 bold")
+        self.edit_frame.place(x=screen_width-1075, y=25, width=1050, height=700)
+        title = ttk.Label(self.edit_frame, text="Pet Edit", font="Arial 24 bold")
         title.grid(column=0, row=0)
+        self.properties_edit = ttk.Frame(self.edit_frame, padding=5, borderwidth=2, style="properties_edit.TFrame")
+        self.properties_edit.grid(column=0, row=1)
+        path_edit = tk.Button(self.properties_edit, text="Edit Path", font="Arial 18 bold", command=self.path_creation)
+        path_edit.grid(column=0, row=10)
+    def edit_choose(self):
+        print("sdfsdf")
+    def path_creation(self):
+        global path
+        self.edit_frame.place_forget()
+        self.pet_frame.place_forget()
+        path = Path()
+        for b in self.buttons:
+            b.place_forget()
+        canvas.configure(bg="white")
+        button = tk.Button(canvas, height=1, width=10, bg="red", command=self.exit_path_creation, text="Cancel", fg="white", font="Arial 18 bold")
+        button.place(x=1350, y=750)
+        self.buttons.append(button)
+    def exit_path_creation(self):
+        global path
+        self.buttons[0].place_forget()
+        canvas.configure(bg="grey15")
+        del path
+        path = ""
+        self.create_buttons()
     def organisation(self):
-        print("sdf")
+        self.organisation_frame = ttk.Frame(canvas, padding=5, borderwidth=2, style="frame.TFrame")
+        self.organisation_frame.place(x=screen_width-1075, y=25, width=1050, height=700)
     def switch_page(self, page):
-        print(page)
+        if self.current_page == "Pet Select":
+            self.pet_frame.place_forget()
+        elif self.current_page == "Pet Edit":
+            self.edit_frame.place_forget()
+            self.pet_frame.place_forget()
+        elif self.current_page == "Organisation":
+            self.organisation_frame.place_forget()
         if page == "Quit":
             window.destroy()
         elif page == "Pet Select":
-            self.pet_select()
+            self.pet_select(screen_width, self.pet_create)
         elif page == "Pet Edit":
             self.pet_edit()
         elif page == "Organisation":
             self.organisation()
-        if self.current_page == "Pet Select" and self.pet_frame != "":
-            self.pet_frame.place_forget()
-        elif self.current_page == "Pet Edit" and self.edit_frame != "":
-            self.edit_frame.place_forget()
-        elif self.current_page == "Organisation" and self.organisation_frame != "":
-            self.organisation_frame.place_forget
         self.current_page = page
-
-    def choose_pet(self):
-        global pet
-        pet = Pet()
+    def pet_create(self):
+        global pet, screen_state, path
         self.pet_frame.place_forget()
+        pet = Pet()
+        screen_state = True
         for b in self.buttons:
             b.place_forget()
 
-# class Path():
-#     def __init__(self):
-#         self.points = []
-#         self.direction = [[50, 50], [50, 50], [50, 50]]
-#         self.distance = [2, 2, 2]
-#         self.colour = [colour_1, colour_2, colour_3, colour_4, colour_5, colour_6, colour_7, colour_8, colour_9]
-#         self.bezier_points = []
-#         for i in range(3):
-#             # drawing_points = [self.points[i][0], self.points[i][1], self.tweenpoints[i][0], self.tweenpoints[i][1]]
-#             # line = canvas.create_line(drawing_points, fill=self.colour[i], width=2)
-#             # self.direction_canvas.append(line)
-#             node = Node(random.randrange(0, SCREEN_WIDTH), random.randrange(0, SCREEN_HEIGHT), self.colour[i], self.colour[i+6], self.colour[i+3])
-#             self.points.append(node)
 
-#         for i in range(101):
-#             t = i/100
-#             p1 = (1-t)**3
-#             p2 = 3*t*(1-t)**2
-#             p3 = 3*(t**2)*(1-t)
-#             p4 = t**3
-#             point = [self.points[0].x*p1 + self.points[0].post_x*p2 + self.points[1].pre_x*p3 + self.points[1].x*p4, self.points[0].y*p1 + self.points[0].post_y*p2 + self.points[1].pre_y*p3 + self.points[1].y*p4]
-#             self.bezier_points.append(point)
-#             point = [self.points[1].x*p1 + self.points[1].post_x*p2 + self.points[2].pre_x*p3 + self.points[2].x*p4, self.points[1].y*p1 + self.points[1].post_y*p2 + self.points[2].pre_y*p3 + self.points[2].y*p4]
-#             self.bezier_points.append(point)
-#         for p in self.bezier_points:
-#             draw.circle(screen, WHITE, [p[0], p[1]], 2)
-#     def update(self):
-#         for p in self.points:
-#             p.drag(mouse_x, mouse_y)
-#         self.bezier_points = []
-#         for i in range(101):
-#             t = i/100
-#             p1 = (1-t)**3
-#             p2 = 3*t*(1-t)**2
-#             p3 = 3*(t**2)*(1-t)
-#             p4 = t**3
-#             point = [self.points[0].x*p1 + self.points[0].post_x*p2 + self.points[1].pre_x*p3 + self.points[1].x*p4, self.points[0].y*p1 + self.points[0].post_y*p2 + self.points[1].pre_y*p3 + self.points[1].y*p4]
-#             self.bezier_points.append(point)
-#             point = [self.points[1].x*p1 + self.points[1].post_x*p2 + self.points[2].pre_x*p3 + self.points[2].x*p4, self.points[1].y*p1 + self.points[1].post_y*p2 + self.points[2].pre_y*p3 + self.points[2].y*p4]
-#             self.bezier_points.append(point)
-#     def randomize(self):
-#         for i in self.points:
-#             i.x, i.y = random.randrange(0, SCREEN_WIDTH), random.randrange(0, SCREEN_HEIGHT)
-#             i.pre_x, i.pre_y = i.x + math.cos(i.pre_angle)*i.pre_length, i.y + math.sin(i.pre_angle)*i.pre_length
-#             i.post_x, i.post_y = i.x + math.cos(i.post_angle)*i.post_length, i.y + math.sin(i.post_angle)*i.pre_length
-#         self.update()
+class Path:
+    def __init__(self):
+        self.points = []
+        # self.direction = [[50, 50], [50, 50], [50, 50]]
+        # self.distance = [2, 2, 2]
+        # self.colour = [colour_1, colour_2, colour_3, colour_4, colour_5, colour_6, colour_7, colour_8, colour_9]
+        # self.bezier_points = []
+        # for i in range(3):
+        #     # drawing_points = [self.points[i][0], self.points[i][1], self.tweenpoints[i][0], self.tweenpoints[i][1]]
+        #     # line = canvas.create_line(drawing_points, fill=self.colour[i], width=2)
+        #     # self.direction_canvas.append(line)
+        #     node = Node(random.randrange(0, SCREEN_WIDTH), random.randrange(0, SCREEN_HEIGHT), self.colour[i], self.colour[i+6], self.colour[i+3])
+        #     self.points.append(node)
 
-#     def draw(self, screen):
-#         for p in self.points:
-#             p.draw(screen)
-#         for p in self.bezier_points:
-#             draw.circle(screen, WHITE, [p[0], p[1]], 2)
+        # for i in range(101):
+        #     t = i/100
+        #     p1 = (1-t)**3
+        #     p2 = 3*t*(1-t)**2
+        #     p3 = 3*(t**2)*(1-t)
+        #     p4 = t**3
+        #     point = [self.points[0].x*p1 + self.points[0].post_x*p2 + self.points[1].pre_x*p3 + self.points[1].x*p4, self.points[0].y*p1 + self.points[0].post_y*p2 + self.points[1].pre_y*p3 + self.points[1].y*p4]
+        #     self.bezier_points.append(point)
+        #     point = [self.points[1].x*p1 + self.points[1].post_x*p2 + self.points[2].pre_x*p3 + self.points[2].x*p4, self.points[1].y*p1 + self.points[1].post_y*p2 + self.points[2].pre_y*p3 + self.points[2].y*p4]
+        #     self.bezier_points.append(point)
+        # for p in self.bezier_points:
+        #     draw.circle(screen, WHITE, [p[0], p[1]], 2)
+    def create_node(self):
+        print("werewrw")
+    # def update(self):
+    #     for p in self.points:
+    #         p.drag(mouse_x, mouse_y)
+    #     self.bezier_points = []
+    #     for i in range(101):
+    #         t = i/100
+    #         p1 = (1-t)**3
+    #         p2 = 3*t*(1-t)**2
+    #         p3 = 3*(t**2)*(1-t)
+    #         p4 = t**3
+    #         point = [self.points[0].x*p1 + self.points[0].post_x*p2 + self.points[1].pre_x*p3 + self.points[1].x*p4, self.points[0].y*p1 + self.points[0].post_y*p2 + self.points[1].pre_y*p3 + self.points[1].y*p4]
+    #         self.bezier_points.append(point)
+    #         point = [self.points[1].x*p1 + self.points[1].post_x*p2 + self.points[2].pre_x*p3 + self.points[2].x*p4, self.points[1].y*p1 + self.points[1].post_y*p2 + self.points[2].pre_y*p3 + self.points[2].y*p4]
+    #         self.bezier_points.append(point)
+    # def randomize(self):
+    #     for i in self.points:
+    #         i.x, i.y = random.randrange(0, SCREEN_WIDTH), random.randrange(0, SCREEN_HEIGHT)
+    #         i.pre_x, i.pre_y = i.x + math.cos(i.pre_angle)*i.pre_length, i.y + math.sin(i.pre_angle)*i.pre_length
+    #         i.post_x, i.post_y = i.x + math.cos(i.post_angle)*i.post_length, i.y + math.sin(i.post_angle)*i.pre_length
+    #     self.update()
+
+    # def draw(self, screen):
+    #     for p in self.points:
+    #         p.draw(screen)
+    #     for p in self.bezier_points:
+    #         draw.circle(screen, WHITE, [p[0], p[1]], 2)
 
 # class Node:
 #     def __init__(self, pos_x, pos_y, colour, pre_colour, post_colour):
@@ -289,13 +314,21 @@ class UI:
     #     draw.circle(screen, self.post_colour, [self.post_x, self.post_y], self.radius, 4)
 
 def programloop(): # main loop
+    global pet
     if pet != 0:
         pet.update()
-    window.after(1000, programloop)
+    window.after(10, programloop)
 
 def check_key(event): # check what key was pressed
-    if event.keysym == "p":
+    global screen_state
+    if event.keysym == "p" and screen_state == True:
         ui.create_buttons()
+        screen_state = False
+
+def check_mouse(event): # check what key was pressed
+    global path
+    if path != "" and event.:
+        path.create_node()
 
 # creating window / fullscreen / top overlay
 window = tk.Tk()
@@ -304,20 +337,26 @@ window.attributes('-topmost', True)
 s = ttk.Style()
 s.configure("frame.TFrame", background="white")
 s.configure("pet_option.TFrame", background="grey80")
-# set height and width variables
+s.configure("properties_edit.TFrame", background="grey80")
+
+#global
 screen_height = window.winfo_screenheight()
 screen_width = window.winfo_screenwidth()
+path = ""
+pet = 0
+screen_state = False
 
 #set up black canvas
 canvas = tk.Canvas(window, bg='grey15', highlightthickness=0)
 canvas.pack(fill="both", expand=True)
 window.wm_attributes('-transparentcolor', 'grey15') # make black transparent
 
-#global
-pet = 0
+#classes
 ui = UI()
+
 # event bindings
 window.bind("<KeyPress>", check_key)
+window.bind("<ButtonPress-1>", check_mouse)
 
 window.mainloop() # checks events
 
